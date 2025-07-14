@@ -50,21 +50,26 @@ class QRBarScannerCameraState extends State<QRBarScannerCamera> with WidgetsBind
   @override
   dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    FlutterQrReader.stop();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      setState(() => onScreen = true);
+      if (mounted) {
+        setState(() => onScreen = true);
+      }
     } else {
       if (_asyncInitOnce != null && onScreen) {
         FlutterQrReader.stop();
       }
-      setState(() {
-        onScreen = false;
-        _asyncInitOnce = null;
-      });
+      if (mounted) {
+        setState(() {
+          onScreen = false;
+          _asyncInitOnce = null;
+        });
+      }
     }
   }
 
@@ -86,9 +91,11 @@ class QRBarScannerCameraState extends State<QRBarScannerCamera> with WidgetsBind
   void restart() {
     (() async {
       await FlutterQrReader.stop();
-      setState(() {
-        _asyncInitOnce = null;
-      });
+      if (mounted) {
+        setState(() {
+          _asyncInitOnce = null;
+        });
+      }
     })();
   }
 
